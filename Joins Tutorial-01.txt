@@ -1,0 +1,233 @@
+----------------------------------------------------------------------------JOINS------------------------------------------------------------------------------------
+/*
+INNER JOIN
+LEFT OUTER JOIN
+RIGHT OUTER JOIN
+FULL OUTER JOIN
+CROSS JOIN
+SELF JOIN
+NATURAL JOIN
+*/
+
+---JOINS
+
+--A JOIN clause is used to combine rows from two or more tables, based on a related column between them.
+/*
+Different Types of SQL JOINs
+Here are the different types of the JOINs in SQL:
+
+(INNER) JOIN: Returns records that have matching values in both tables
+LEFT (OUTER) JOIN: Returns all records from the left table, and the matched records from the right table
+RIGHT (OUTER) JOIN: Returns all records from the right table, and the matched records from the left table
+FULL (OUTER) JOIN: Returns all records when there is a match in either left or right table
+
+*/
+
+
+create database demo_database_1;
+
+use demo_database_1;
+
+drop table if exists employee;
+create table employee
+(
+	emp_id			varchar(20),
+	emp_name		varchar(50),
+	salary			int,
+	dept_id			varchar(20),
+	manager_id		varchar(20)
+);
+insert into employee values
+('E1', 'Rahul', 15000, 'D1', 'M1'),
+('E2', 'Manoj', 15000, 'D1', 'M1'),
+('E3', 'James', 55000, 'D2', 'M2'),
+('E4', 'Michael', 25000, 'D2', 'M2'),
+('E5', 'Ali', 20000, 'D10', 'M3'),
+('E6', 'Robin', 35000, 'D10', 'M3');
+
+
+drop table if exists department;
+create table department
+(
+	dept_id			varchar(20),
+	dept_name		varchar(50)
+);
+insert into department values
+('D1', 'IT'),
+('D2', 'HR'),
+('D3', 'Finance'),
+('D4', 'Admin');
+
+drop table if exists manager;
+create table manager
+(
+	manager_id			varchar(20),
+	manager_name		varchar(50),
+	dept_id				varchar(20)
+);
+insert into manager values
+('M1', 'Prem', 'D3'),
+('M2', 'Shripadh', 'D4'),
+('M3', 'Nick', 'D1'),
+('M4', 'Cory', 'D1');
+
+drop table if exists projects;
+create table projects
+(
+	project_id			varchar(20),
+	project_name		varchar(100),
+	team_member_id		varchar(20)
+);
+insert into projects values
+('P1', 'Data Migration', 'E1'),
+('P1', 'Data Migration', 'E2'),
+('P1', 'Data Migration', 'M3'),
+('P2', 'ETL Tool', 'E1'),
+('P2', 'ETL Tool', 'M4');
+
+select * from employee;
+select * from department;
+select * from manager;
+select * from projects;
+
+----INNER JOIN
+-- INNER JOIN can also be represented as "JOIN"
+-- INNER Join = Fetches only matching records in both tables based on the JOIN condition.
+
+--Fetch the employee name & the department name they belong to.
+select e.emp_id,e.emp_name,d.dept_name
+from employee e
+INNER JOIN department d on e.dept_id = d.dept_id;
+
+/*
+So only the records which is present in both the tables will be fetch from the tables using inner join.
+& when i say records you dont need to match the every single columns in both the tables,You just need to match the columns which you specified the JOIN Conditions.
+*/
+
+--LEFT OUTER JOIN
+
+-- LEFT JOIN can also be represented as "LEFT OUTER JOIN"
+-- LEFT Join = INNER Join + all remaining records from Left Table (returns null value for any columns fetched from right table)
+
+--Fetch All the employee name & their department name they belong to.
+select e.emp_id,e.emp_name,d.dept_name
+from employee e
+LEFT OUTER JOIN department d on e.dept_id = d.dept_id;
+
+-- LEFT OUTER JOIN = INNER JOIN + Any additional records in the left table
+
+--RIGHT OUTER JOIN
+
+-- RIGHT JOIN can also be represented as "RIGHT OUTER JOIN"
+-- RIGHT Join = INNER Join + all remaining records from Right Table (returns null value for any columns fetched from left table)
+
+select e.emp_id,e.emp_name,d.dept_name
+from employee e
+RIGHT OUTER JOIN department d on e.dept_id = d.dept_id;
+
+-- RIGHT OUTER JOIN = INNER JOIN + Any additional records in the Right table
+
+--- Fetch details of all employees ,their managers,their department & the projects they work on.
+
+select e.emp_name,d.dept_name,m.manager_name
+from employee e
+LEFT OUTER JOIN department d on e.dept_id = d.dept_id
+INNER JOIN manager m on m.manager_id = e.manager_id
+LEFT OUTER JOIN projects p on p.team_member_id = e.emp_id;
+
+--- FULL OUTER JOIN
+/*
+
+FULL JOIN can also be represented as "FULL OUTER JOIN"
+-- FULL Join = INNER Join
+--              + all remaining records from Left Table (returns null value for any columns fetched from right table)
+--              + all remaining records from Right Table (returns null value for any columns fetched from left table)
+
+*/
+--- -- Write a query to fetch the employee name and their corresponding department name.
+
+select e.emp_name,d.dept_name
+from employee e 
+FULL OUTER JOIN department d on e.dept_id = d.dept_id;
+
+----CROSS JOIN
+/*
+In SQL, the CROSS JOIN is a unique join operation that returns the Cartesian product of two or more tables.
+This means it matches each row from the left table with every row from the right table,
+resulting in a combination of all possible pairs of records.
+
+Important Points About CROSS JOIN:
+
+CROSS JOIN performs the cross-product of records from two or more joined tables.
+
+It is used when we want every possible combination of rows to be present in a database’s tables. 
+
+SQL CROSS JOIN with condition of WHERE Clause operates as an INNER JOIN; when used without one,
+it produces the cartesian product of all the rows from all the tables provided in the SQL query.
+
+CROSS JOIN is different from other join types like INNER JOIN, LEFT JOIN, and RIGHT JOIN
+as it does not require a matching condition between the tables.
+
+*/
+select e.emp_name, d.dept_name
+from employee e
+CROSS JOIN department d;
+
+create table company
+(
+	company_id			varchar(20),
+	company_name		varchar(50),
+	location		varchar(20)
+);
+insert into company values
+('C001', 'Tech tfq Solutions', 'India');
+
+select * from company;
+
+-- Write a query to fetch the employee name and their corresponding department name.
+-- Also make sure to display the company name and the company location correspodning to each employee.
+
+select e.emp_name,d.dept_name,c.company_name,c.location
+from employee e
+INNER JOIN department d on e.dept_id = d.dept_id
+CROSS JOIN company c;
+
+---- NATURAL JOIN
+
+-- NATURAL JOIN - SQL will naturally choose the column on which join should happen based on the column name.
+-- Natural join will perform inner join operation if there are columns with same name in both table. If there are more than 1 column with same name then join will happen based on all these columns.
+-- If there are no columns with same name in both table then it performs cross join
+-- If you specify * in select list then it displays the join columns in the beginning and does not repeat it.
+-- No join condition is required to be specified.
+
+----SELF JOIN
+
+--Find employees with salary more than their mangers salary
+
+create table Np_employee(
+    emp_id int,
+    emp_name varchar(20),
+    dept_id int,
+    salary int,
+    manager_id int,
+    emp_age int
+);
+
+
+insert into Np_employee values(1,'Ankit',100,10000,4,39);
+insert into Np_employee values(2,'Mohit',100,15000,5,48);
+insert into Np_employee values(3,'Vikas',100,10000,4,37);
+insert into Np_employee values(4,'Rohit',100,5000,2,16);
+insert into Np_employee values(5,'Mudit',200,12000,6,55);
+insert into Np_employee values(6,'Agam',200,12000,2,14);
+insert into Np_employee values(7,'Sanjay',200,9000,2,13);
+insert into Np_employee values(8,'Ashish',200,5000,2,12);
+insert into Np_employee values(9,'Mukesh',300,6000,6,51);
+insert into Np_employee values(10,'Rakesh',500,7000,6,50);
+
+select * from Np_employee;
+
+select emp.emp_id,emp.emp_name,mgr.emp_id as Manager_emp_id,Mgr.emp_name as manager_name,emp.salary as emp_salary,Mgr.salary as manager_salary
+from Np_employee as Mgr
+JOIN Np_employee as emp ON emp.manager_id = Mgr.emp_id
+WHERE emp.salary > Mgr.salary;
